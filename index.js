@@ -1,10 +1,11 @@
+require('dotenv').config();
 const express = require('express');  
 const bodyParser = require('body-parser');  
 const url = require('url');  
 const querystring = require('querystring');
 
 let winston = require('winston');
-const { createProxyMiddleware } = require('http-proxy-middleware');ß
+const { createProxyMiddleware } = require('http-proxy-middleware');
 let logger = winston.createLogger({
     level: 'info',
     format: winston.format.combine(
@@ -20,7 +21,7 @@ let logger = winston.createLogger({
 });
 
 let app = express();
-const API_SERVICE_URL = "https://7dhh357fn1.execute-api.ap-southeast-2.amazonaws.com/Prod/MyResource?name=message1";  
+const API_SERVICE_URL = process.env.API_SERVICE_URL;  
 app.use(bodyParser.urlencoded({ extended: false }));  
 app.use(bodyParser.json());
 
@@ -38,6 +39,16 @@ app.use('/michael', createProxyMiddleware({
        [`^/michael`]: '',
    }
 }));
+
+app.post('/demo', function(request, response){
+    logger.log('info', request.body);
+    response.send({
+        device: request.body.device,
+        time: request.body.time,
+        data: request.body.data,
+        seqNumber: request.body.seqNumber
+    });
+  });
 
 let server = app.listen(8080, function() {  
     logger.log('info', 'Server is listening on port 8080')
