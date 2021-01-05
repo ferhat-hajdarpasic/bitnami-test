@@ -45,7 +45,7 @@ app.post('/demo', function (request, response) {
     logger.log('info', request.body);
     const form = {
         cbkey: process.env.CBKEY,
-        batch: `${request.body.device};${request.body.time};${request.body.data};${request.body.seqNumber}`
+        batch: `${request.body.device};${Math.floor(new Date().getTime() / 1000)};${request.body.data};${request.body.seqNumber}`
     };
     const formData = querystring.stringify(form);
     const contentLength = formData.length;
