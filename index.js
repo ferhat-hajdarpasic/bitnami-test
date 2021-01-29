@@ -4,6 +4,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const url = require('url');
 const querystring = require('querystring');
+const axios = require('axios');
 
 let winston = require('winston');
 const { createProxyMiddleware } = require('http-proxy-middleware');
@@ -41,7 +42,7 @@ app.use('/michael', createProxyMiddleware({
     }
 }));
 
-app.post('/demo', function (request, response) {
+app.post('/demo-old', function (request, response) {
     logger.log('info', request.body);
     const form = {
         cbkey: process.env.CBKEY,
@@ -67,6 +68,42 @@ app.post('/demo', function (request, response) {
     });
 });
 
-let server = app.listen(8080, function () {
-    logger.log('info', 'Server is listening on port 8080')
+sendToAirTracker = async (device, data, seqNumber) => {
+    const form = {
+        cbkey: process.env.CBKEY,
+        batch: `${device};${Math.floor(new Date().getTime() / 1000)};${data};${seqNumber}`
+    };
+    const formData = querystring.stringify(form);
+    const contentLength = formData.length;
+
+    return await axios.post(process.env.AIRTRACKER_URL,
+        formData, {
+        headers: {
+            'Content-Length': contentLength,
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'host': process.env.AIRTRACKER
+        }
+    });
+}
+
+app.post('/demo', async function (request, response) {
+    logger.log('info', `Sending data for unit: ${request.body.device}, data=${request.body.data}`);
+
+    try {
+        let remoteResponse = await sendToAirTracker(request.body.device, request.body.data, request.body.seqNumber);
+        if (request.body.temperatureData) {
+            logger.log('info', 'Sending temperature data');
+            remoteResponse = await sendToAirTracker(request.body.device, request.body.data, request.body.seqNumber);
+        }
+        logger.log('info', remoteResponse.statusText);
+        response.status(remoteResponse.status).send(remoteResponse.headers);
+    } catch (e) {
+        logger.log('error', e);
+        response.status(500).send(e);
+    }
+});
+
+const port = 8000;
+let server = app.listen(port, function () {
+    logger.log('info', `Server is listening on port ${port}`)
 });
