@@ -92,17 +92,17 @@ app.post('/demo', async function (request, response) {
         let remoteResponse = await sendToAirTracker(request.body.device, request.body.data, request.body.seqNumber);
         logger.log('info', remoteResponse.statusText);
         if (request.body.temperatureData) {
-            logger.log('info', 'Sending temperature data');
+            logger.log('info', `Sending temperature data for unit: ${request.body.device}, data=${request.body.temperatureData}`);
             remoteResponse = await sendToAirTracker(request.body.device, request.body.temperatureData, request.body.seqNumber);
             logger.log('info', remoteResponse.statusText);
         }
         if (request.body.data2) {
-            logger.log('info', 'Sending data2');
+            logger.log('info', `Sending data2 for unit: ${request.body.device}, data=${request.body.data2}`);
             remoteResponse = await sendToAirTracker(request.body.device, request.body.data2, request.body.seqNumber);
             logger.log('info', remoteResponse.statusText);
         }
         if (request.body.data3) {
-            logger.log('info', 'Sending data3');
+            logger.log('info', `Sending data3 for unit: ${request.body.device}, data=${request.body.data3}`);
             remoteResponse = await sendToAirTracker(request.body.device, request.body.data3, request.body.seqNumber);
             logger.log('info', remoteResponse.statusText);
         }
