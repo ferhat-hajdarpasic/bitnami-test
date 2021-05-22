@@ -1,3 +1,4 @@
-pm2 start index.js
+pm2 start index.js --name "bitnami-test"
 pm2 list
-pm2 stop index
+pm2 stop bitnami-test
+

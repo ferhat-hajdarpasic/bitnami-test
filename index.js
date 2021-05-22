@@ -113,7 +113,7 @@ app.post('/demo', async function (request, response) {
     }
 });
 
-const port = 8000;
+const port = 8080;
 let server = app.listen(port, function () {
     logger.log('info', `Server is listening on port ${port}`)
 });
