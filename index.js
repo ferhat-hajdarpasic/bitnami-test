@@ -68,7 +68,7 @@ app.post('/demo-old', function (request, response) {
     });
 });
 
-sendToAirTracker = async (device, data, seqNumber) => {
+const sendToAirTracker = async (device, data, seqNumber) => {
     const form = {
         cbkey: process.env.CBKEY,
         batch: `${device};${Math.floor(new Date().getTime() / 1000)};${data};${seqNumber}`
@@ -88,14 +88,24 @@ sendToAirTracker = async (device, data, seqNumber) => {
 
 app.post('/demo', async function (request, response) {
     logger.log('info', `Sending data for unit: ${request.body.device}, data=${request.body.data}`);
-
     try {
         let remoteResponse = await sendToAirTracker(request.body.device, request.body.data, request.body.seqNumber);
+        logger.log('info', remoteResponse.statusText);
         if (request.body.temperatureData) {
             logger.log('info', 'Sending temperature data');
-            remoteResponse = await sendToAirTracker(request.body.device, request.body.data, request.body.seqNumber);
+            remoteResponse = await sendToAirTracker(request.body.device, request.body.temperatureData, request.body.seqNumber);
+            logger.log('info', remoteResponse.statusText);
         }
-        logger.log('info', remoteResponse.statusText);
+        if (request.body.data2) {
+            logger.log('info', 'Sending data2');
+            remoteResponse = await sendToAirTracker(request.body.device, request.body.data2, request.body.seqNumber);
+            logger.log('info', remoteResponse.statusText);
+        }
+        if (request.body.data3) {
+            logger.log('info', 'Sending data3');
+            remoteResponse = await sendToAirTracker(request.body.device, request.body.data3, request.body.seqNumber);
+            logger.log('info', remoteResponse.statusText);
+        }
         response.status(remoteResponse.status).send(remoteResponse.headers);
     } catch (e) {
         logger.log('error', e);
