@@ -71,7 +71,7 @@ app.get("/liteman", function (request, response) {
                     //     grid: grid(f.grid)
                     // }
                 })
-                const responseBody = frames.join('');
+                const responseBody = frames.join('\n');
                 response.status(res.statusCode).send(responseBody);
             }
         }
