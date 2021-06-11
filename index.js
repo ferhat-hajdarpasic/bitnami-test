@@ -46,11 +46,15 @@ app.use(
 );
 
 app.get("/liteman", function (request, response) {
-    logger.log("liteman: info", request.body);
+    logger.log("liteman: info", JSON.stringify(request.query));
 
+    const messageName = 'message4';
+    const username = 'fred.hajdarpasic@outlook.com';
+
+    const url = `${process.env.API_SERVICE_URL}/Prod/MyResource?entityType=find_message_by_name&entityId=${messageName}&username=${username}`;
     requestModule.get(
         {
-            uri: process.env.API_SERVICE_URL,
+            uri: url,
         },
         function (err, res, body) {
             const parsedBody = JSON.parse(body);
