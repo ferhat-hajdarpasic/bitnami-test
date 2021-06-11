@@ -62,7 +62,7 @@ app.get("/liteman", function (request, response) {
             } else {
                 const frames = parsedBody.frames.map(f => {
                     // const grid = grid => grid.map(row => row.join('')).map(row.join('\n'))
-                    const grid = g => g.map(row => row.join(''))
+                    const grid = g => g.map(row => row.join('')).join('|')
                     return {
                         duration: f.duration,
                         index: f.index,
