@@ -68,7 +68,7 @@ app.get("/liteman", function (request, response) {
                         grid: f.grid
                     }
                 })
-                response.status(res.statusCode).send(parsedBody.frames);
+                response.status(res.statusCode).send(frames);
             }
         }
     );
