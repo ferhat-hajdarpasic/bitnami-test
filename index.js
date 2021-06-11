@@ -60,6 +60,14 @@ app.get("/liteman", function (request, response) {
                     res: res,
                 });
             } else {
+                const frames = parsedBody.frames.map(f => {
+                    const grid = grid => grid.map(row => row.join('')).map(row.join('\n'))
+                    return {
+                        duration: f.duration,
+                        index: f.index,
+                        grid: grid(f.grid)
+                    }
+                })
                 response.status(res.statusCode).send(parsedBody.frames);
             }
         }
