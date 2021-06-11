@@ -1,25 +1,25 @@
-require('dotenv').config();
-const requestModule = require('request');
-const express = require('express');
-const bodyParser = require('body-parser');
-const url = require('url');
-const querystring = require('querystring');
-const axios = require('axios');
+require("dotenv").config();
+const requestModule = require("request");
+const express = require("express");
+const bodyParser = require("body-parser");
+const url = require("url");
+const querystring = require("querystring");
+const axios = require("axios");
 
-let winston = require('winston');
-const { createProxyMiddleware } = require('http-proxy-middleware');
+let winston = require("winston");
+const { createProxyMiddleware } = require("http-proxy-middleware");
 let logger = winston.createLogger({
-    level: 'info',
+    level: "info",
     format: winston.format.combine(
         winston.format.timestamp(),
-        winston.format.printf(info => {
+        winston.format.printf((info) => {
             return `${info.timestamp} ${info.level}: ${info.message}`;
         })
     ),
     transports: [
         new winston.transports.Console(),
-        new winston.transports.File({ filename: 'test.log' })
-    ]
+        new winston.transports.File({ filename: "test.log" }),
+    ],
 });
 
 let app = express();
@@ -28,107 +28,150 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 // Function to handle the root path
-app.get('/', async function (req, res) {
-    logger.log('info', JSON.stringify(req.query));
-    res.writeHead(200, { 'Content-type': 'text/plain' });
-    res.end('Hello World');
+app.get("/", async function (req, res) {
+    logger.log("info", JSON.stringify(req.query));
+    res.writeHead(200, { "Content-type": "text/plain" });
+    res.end("Hello World");
 });
 
-app.use('/michael', createProxyMiddleware({
-    target: API_SERVICE_URL,
-    changeOrigin: true,
-    pathRewrite: {
-        [`^/michael`]: '',
-    }
-}));
+app.use(
+    "/michael",
+    createProxyMiddleware({
+        target: API_SERVICE_URL,
+        changeOrigin: true,
+        pathRewrite: {
+            [`^/michael`]: "",
+        },
+    })
+);
 
-app.get('/liteman', function (request, response) {
-    logger.log('liteman: info', request.body);
+app.get("/liteman", function (request, response) {
+    logger.log("liteman: info", request.body);
 
-    requestModule.get({
-        uri: process.env.API_SERVICE_URL
-    }, function (err, res, body) {
-        const parsedBody = JSON.parse(body);
-        response.status(res.statusCode).send({
-            err: err,
-            res: res,
-            body: parsedBody.frames
-        });
-    });
+    requestModule.get(
+        {
+            uri: process.env.API_SERVICE_URL,
+        },
+        function (err, res, body) {
+            const parsedBody = JSON.parse(body);
+            if (err) {
+                response.status(res.statusCode).send({
+                    err: err,
+                    res: res,
+                });
+            } else {
+                response.status(res.statusCode).send(parsedBody.frames);
+            }
+        }
+    );
 });
 
-app.post('/demo-old', function (request, response) {
-    logger.log('info', request.body);
+app.post("/demo-old", function (request, response) {
+    logger.log("info", request.body);
     const form = {
         cbkey: process.env.CBKEY,
-        batch: `${request.body.device};${Math.floor(new Date().getTime() / 1000)};${request.body.data};${request.body.seqNumber}`
+        batch: `${request.body.device};${Math.floor(
+            new Date().getTime() / 1000
+        )};${request.body.data};${request.body.seqNumber}`,
     };
     const formData = querystring.stringify(form);
     const contentLength = formData.length;
 
-    requestModule.post({
-        headers: {
-            'Content-Length': contentLength,
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'host': process.env.AIRTRACKER
+    requestModule.post(
+        {
+            headers: {
+                "Content-Length": contentLength,
+                "Content-Type": "application/x-www-form-urlencoded",
+                host: process.env.AIRTRACKER,
+            },
+            uri: process.env.AIRTRACKER_URL,
+            body: formData,
         },
-        uri: process.env.AIRTRACKER_URL,
-        body: formData
-    }, function (err, res, body) {
-        response.status(res.statusCode).send({
-            err: err,
-            res: res,
-            body: body
-        });
-    });
+        function (err, res, body) {
+            response.status(res.statusCode).send({
+                err: err,
+                res: res,
+                body: body,
+            });
+        }
+    );
 });
 
 const sendToAirTracker = async (device, data, seqNumber) => {
     const form = {
         cbkey: process.env.CBKEY,
-        batch: `${device};${Math.floor(new Date().getTime() / 1000)};${data};${seqNumber}`
+        batch: `${device};${Math.floor(
+            new Date().getTime() / 1000
+        )};${data};${seqNumber}`,
     };
     const formData = querystring.stringify(form);
     const contentLength = formData.length;
 
-    return await axios.post(process.env.AIRTRACKER_URL,
-        formData, {
+    return await axios.post(process.env.AIRTRACKER_URL, formData, {
         headers: {
-            'Content-Length': contentLength,
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'host': process.env.AIRTRACKER
-        }
+            "Content-Length": contentLength,
+            "Content-Type": "application/x-www-form-urlencoded",
+            host: process.env.AIRTRACKER,
+        },
     });
-}
+};
 
-app.post('/demo', async function (request, response) {
-    logger.log('info', `Sending data for unit: ${request.body.device}, data=${request.body.data}`);
+app.post("/demo", async function (request, response) {
+    logger.log(
+        "info",
+        `Sending data for unit: ${request.body.device}, data=${request.body.data}`
+    );
     try {
-        let remoteResponse = await sendToAirTracker(request.body.device, request.body.data, request.body.seqNumber);
-        logger.log('info', remoteResponse.statusText);
+        let remoteResponse = await sendToAirTracker(
+            request.body.device,
+            request.body.data,
+            request.body.seqNumber
+        );
+        logger.log("info", remoteResponse.statusText);
         if (request.body.temperatureData) {
-            logger.log('info', `Sending temperature data for unit: ${request.body.device}, data=${request.body.temperatureData}`);
-            remoteResponse = await sendToAirTracker(request.body.device, request.body.temperatureData, request.body.seqNumber);
-            logger.log('info', remoteResponse.statusText);
+            logger.log(
+                "info",
+                `Sending temperature data for unit: ${request.body.device}, data=${request.body.temperatureData}`
+            );
+            remoteResponse = await sendToAirTracker(
+                request.body.device,
+                request.body.temperatureData,
+                request.body.seqNumber
+            );
+            logger.log("info", remoteResponse.statusText);
         }
         if (request.body.data2) {
-            logger.log('info', `Sending data2 for unit: ${request.body.device}, data=${request.body.data2}`);
-            remoteResponse = await sendToAirTracker(request.body.device, request.body.data2, request.body.seqNumber);
-            logger.log('info', remoteResponse.statusText);
+            logger.log(
+                "info",
+                `Sending data2 for unit: ${request.body.device}, data=${request.body.data2}`
+            );
+            remoteResponse = await sendToAirTracker(
+                request.body.device,
+                request.body.data2,
+                request.body.seqNumber
+            );
+            logger.log("info", remoteResponse.statusText);
         }
         if (request.body.data3) {
-            logger.log('info', `Sending data3 for unit: ${request.body.device}, data=${request.body.data3}`);
-            remoteResponse = await sendToAirTracker(request.body.device, request.body.data3, request.body.seqNumber);
-            logger.log('info', remoteResponse.statusText);
+            logger.log(
+                "info",
+                `Sending data3 for unit: ${request.body.device}, data=${request.body.data3}`
+            );
+            remoteResponse = await sendToAirTracker(
+                request.body.device,
+                request.body.data3,
+                request.body.seqNumber
+            );
+            logger.log("info", remoteResponse.statusText);
         }
         response.status(remoteResponse.status).send(remoteResponse.headers);
     } catch (e) {
-        logger.log('error', e);
+        logger.log("error", e);
         response.status(500).send(e);
     }
 });
 
 const port = 8080;
 let server = app.listen(port, function () {
-    logger.log('info', `Server is listening on port ${port}`)
+    logger.log("info", `Server is listening on port ${port}`);
 });
