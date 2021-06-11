@@ -46,7 +46,7 @@ app.use(
 );
 
 app.get("/liteman", async function (request, response) {
-    logger.info("liteman", JSON.stringify(request.query));
+    logger.info('liteman: ' + JSON.stringify(request.query));
 
     const messageName = 'message4';
     const username = 'fred.hajdarpasic@outlook.com';
