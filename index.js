@@ -48,10 +48,11 @@ app.get('/liteman', function (request, response) {
     requestModule.get({
         uri: process.env.API_SERVICE_URL
     }, function (err, res, body) {
+        const parsedBody = JSON.parse(body);
         response.status(res.statusCode).send({
             err: err,
             res: res,
-            body: body.frames
+            body: parsedBody.frames
         });
     });
 });
