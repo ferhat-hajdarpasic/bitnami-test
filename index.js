@@ -45,7 +45,7 @@ app.use(
     })
 );
 
-app.get("/liteman", function (request, response) {
+app.get("/liteman", async function (request, response) {
     logger.log("liteman: info", JSON.stringify(request.query));
 
     const messageName = 'message4';
