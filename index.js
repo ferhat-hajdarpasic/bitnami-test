@@ -46,12 +46,12 @@ app.get('/liteman', function (request, response) {
     logger.log('liteman: info', request.body);
 
     requestModule.get({
-        uri: process.env.AIRTRACKER_URL
+        uri: process.env.API_SERVICE_URL
     }, function (err, res, body) {
         response.status(res.statusCode).send({
             err: err,
             res: res,
-            body: body
+            body: body.frames
         });
     });
 });
