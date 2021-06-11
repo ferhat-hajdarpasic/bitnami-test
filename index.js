@@ -46,12 +46,12 @@ app.use(
 );
 
 app.get("/liteman", async function (request, response) {
-    logger.info('liteman: ' + JSON.stringify(request.query));
+    logger.info("liteman: " + JSON.stringify(request.query));
 
-    const messageName = 'message4';
-    const username = 'fred.hajdarpasic@outlook.com';
+    const messageName = request.query.messageName;
+    const userName = request.query.userName;
 
-    const url = `${process.env.API_SERVICE_URL}/Prod/MyResource?entityType=find_message_by_name&entityId=${messageName}&username=${username}`;
+    const url = `${process.env.API_SERVICE_URL}/Prod/MyResource?entityType=find_message_by_name&entityId=${messageName}&username=${userName}`;
     requestModule.get(
         {
             uri: url,
@@ -64,18 +64,12 @@ app.get("/liteman", async function (request, response) {
                     res: res,
                 });
             } else {
-                const frames = parsedBody.frames.map(f => {
-                    // const grid = grid => grid.map(row => row.join('')).map(row.join('\n'))
-                    const grid = g => g.map(row => row.join('')).join('\n');
+                const frames = parsedBody.frames.map((f) => {
+                    const grid = (g) => g.map((row) => row.join("")).join("\n");
                     const response = `${f.duration}\n${grid(f.grid)}`;
                     return response;
-                    // return {
-                    //     duration: f.duration,
-                    //     index: f.index,
-                    //     grid: grid(f.grid)
-                    // }
-                })
-                const responseBody = frames.join('\n');
+                });
+                const responseBody = frames.join("\n");
                 response.status(res.statusCode).send(responseBody);
             }
         }
