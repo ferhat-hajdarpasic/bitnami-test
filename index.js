@@ -42,6 +42,20 @@ app.use('/michael', createProxyMiddleware({
     }
 }));
 
+app.get('/liteman', function (request, response) {
+    logger.log('liteman: info', request.body);
+
+    requestModule.get({
+        uri: process.env.AIRTRACKER_URL
+    }, function (err, res, body) {
+        response.status(res.statusCode).send({
+            err: err,
+            res: res,
+            body: body
+        });
+    });
+});
+
 app.post('/demo-old', function (request, response) {
     logger.log('info', request.body);
     const form = {
