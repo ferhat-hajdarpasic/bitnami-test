@@ -62,12 +62,14 @@ app.get("/liteman", function (request, response) {
             } else {
                 const frames = parsedBody.frames.map(f => {
                     // const grid = grid => grid.map(row => row.join('')).map(row.join('\n'))
-                    const grid = g => g.map(row => row.join('')).join('\n')
-                    return {
-                        duration: f.duration,
-                        index: f.index,
-                        grid: grid(f.grid)
-                    }
+                    const grid = g => g.map(row => row.join('')).join('\n');
+                    const response = `${f.duration}\n${grid(f.grid)}`;
+                    return response;
+                    // return {
+                    //     duration: f.duration,
+                    //     index: f.index,
+                    //     grid: grid(f.grid)
+                    // }
                 })
                 response.status(res.statusCode).send('frames');
             }
